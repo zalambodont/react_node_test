@@ -105,10 +105,10 @@ const UserDashboard = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-blue-100 to-gray-100">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gradient-to-br from-blue-100 to-gray-100">
       <UserSidebar />
 
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-6 relative z-30 overflow-x-hidden">
         <h2 className="text-4xl font-bold text-gray-900 mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
           🚀 User Dashboard
         </h2>
@@ -119,7 +119,7 @@ const UserDashboard = () => {
           <DndContext collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {Object.keys(tasks).map((columnKey) => (
-                <Column key={columnKey} title={columnKey} id={columnKey} className="w-[280px]">
+                <Column key={columnKey} title={columnKey} id={columnKey} className="w-full min-w-0">
                   <SortableContext items={tasks[columnKey].map((task) => task.id)} strategy={verticalListSortingStrategy}>
                     {tasks[columnKey].map((task) => (
                       <SortableItem key={task.id} id={task.id} task={task} />
@@ -142,7 +142,7 @@ const UserDashboard = () => {
           </div>
 
           {/* Notes */}
-          <div className="p-6 w-full lg:w-[590px] bg-green-900 text-white rounded-xl border-[12px] border-[#8B4501] shadow-lg flex flex-col">
+          <div className="p-6 w-full lg:w-1/2 bg-green-900 text-white rounded-xl border-[12px] border-[#8B4501] shadow-lg flex flex-col">
             <h2 className="text-2xl font-bold text-yellow-400 mb-2 text-center">📌 Notes</h2>
 
             {/* Notes Input Field - Enlarged to match Task Analytics */}

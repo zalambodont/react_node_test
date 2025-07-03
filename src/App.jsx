@@ -43,6 +43,10 @@ import ProfilePage from "./pages/UserPages/ProfilePage";
 // Feature Components
 import TaskFilter from "./components/tasks/TaskFilter";
 
+// Feedback Components
+import UserFeedback from "./components/user/UserFeedback";
+import FeedbackManagement from "./components/admin/FeedbackManagement";
+
 // Context Providers
 import AuthProvider from "./contexts/AuthContext";
 import NotificationProvider from "./contexts/NotificationContext";
@@ -99,7 +103,7 @@ function App() {
           <div className="flex flex-col min-h-screen">
             <Navbar />
             
-            <main className="flex-grow">
+            <main className="flex-grow pt-16">
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<AuthRouter />} />
@@ -166,6 +170,14 @@ function App() {
                     </ProtectedRoute>
                   } 
                 />
+                <Route 
+                  path="/admin/feedback" 
+                  element={
+                    <ProtectedRoute requiredRole="admin">
+                      <FeedbackManagement />
+                    </ProtectedRoute>
+                  } 
+                />
                 
                 {/* Protected User Routes */}
                 <Route 
@@ -213,6 +225,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <TaskFilter />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/user/feedback" 
+                  element={
+                    <ProtectedRoute>
+                      <UserFeedback />
                     </ProtectedRoute>
                   } 
                 />

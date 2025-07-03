@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { FaChartBar, FaTasks, FaCalendarAlt, FaBell, FaUser, FaFilter } from "react-icons/fa";
+import { FaChartBar, FaTasks, FaCalendarAlt, FaBell, FaUser, FaFilter, FaCommentAlt } from "react-icons/fa";
+import ResponsiveSidebar from "../../components/common/ResponsiveSidebar";
 
 const UserSidebar = () => {
   const location = useLocation();
@@ -12,13 +13,12 @@ const UserSidebar = () => {
     { path: "/user/task-filter", label: "Filter Tasks", icon: <FaFilter /> },
     { path: "/user/calendar", label: "Calendar", icon: <FaCalendarAlt /> },
     { path: "/user/notifications", label: "Notifications", icon: <FaBell /> },
+    { path: "/user/feedback", label: "Submit Feedback", icon: <FaCommentAlt /> },
     { path: "/user/profile", label: "Profile", icon: <FaUser /> },
   ];
 
   return (
-    <div className="w-64 min-h-screen p-6 bg-gray-900 text-white glassmorphism border-r border-gray-700">
-      <h2 className="text-2xl font-extrabold text-center text-gray-100 tracking-wide mb-6">🚀 User Panel</h2>
-
+    <ResponsiveSidebar title="User Panel" icon="🚀">
       <ul className="space-y-3">
         {menuItems.map(({ path, label, icon }) => (
           <li key={path}>
@@ -36,7 +36,7 @@ const UserSidebar = () => {
           </li>
         ))}
       </ul>
-    </div>
+    </ResponsiveSidebar>
   );
 };
 

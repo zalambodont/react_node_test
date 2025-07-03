@@ -7,12 +7,12 @@ import TaskChart from "../../components/admin/TaskAnalytics";
 
 const Dashboard = () => {
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main Content */}
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-6 relative z-30">
         <h1 className="text-2xl font-bold text-gray-800 mb-4">Admin Dashboard</h1>
 
         {/* Admin Statistics */}

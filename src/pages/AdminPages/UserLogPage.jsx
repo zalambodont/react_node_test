@@ -248,12 +248,12 @@ const UserLogPage = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-gray-100">
+      <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
         {/* Sidebar */}
         <Sidebar />
 
         {/* Main Content */}
-        <div className="flex-1 p-6 flex justify-center items-center" aria-live="polite" role="status">
+        <div className="flex-1 p-6 flex justify-center items-center relative z-30" aria-live="polite" role="status">
           <FaSpinner className="animate-spin text-blue-500 text-2xl" aria-hidden="true" />
           <span className="ml-2">Loading user logs...</span>
         </div>
@@ -264,12 +264,12 @@ const UserLogPage = () => {
   // Error state
   if (error) {
     return (
-      <div className="flex min-h-screen bg-gray-100">
+      <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
         {/* Sidebar */}
         <Sidebar />
 
         {/* Main Content */}
-        <div className="flex-1 p-6 text-red-500 flex items-center" aria-live="assertive" role="alert">
+        <div className="flex-1 p-6 text-red-500 flex items-center relative z-30" aria-live="assertive" role="alert">
           <FaExclamationTriangle className="mr-2" aria-hidden="true" />
           <span>{error}</span>
         </div>
@@ -278,12 +278,12 @@ const UserLogPage = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main Content */}
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-6 relative z-30">
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-2xl font-bold mb-6 text-gray-800 flex items-center">
             <FaUserShield className="mr-2" aria-hidden="true" />
