@@ -1,12 +1,10 @@
 import { defineConfig } from 'vite'
-import redirect_router from "react-redirect-router"
 import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    react(), 
-    redirect_router()
+    react()
   ],
   build: {
     outDir: 'dist',

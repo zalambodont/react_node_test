@@ -165,6 +165,9 @@ const AuthProvider = ({ children }) => {
     localStorage.removeItem("userId");
     localStorage.removeItem("email");
     
+    // Don't completely remove profile data as it's persistent, 
+    // but ensure we don't show previous user's email on header
+    
     // Reset user state
     setUser(null);
     

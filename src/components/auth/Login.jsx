@@ -59,7 +59,15 @@ const Login = () => {
     const token = localStorage.getItem("token");
     if (token) {
       const userRole = localStorage.getItem("userRole");
-      navigate(userRole === "admin" ? "/admin/dashboard" : "/user/dashboard");
+      
+      // Simply redirect based on role, no email checks
+      if (userRole === "admin") {
+        console.log("Initial check: Admin user detected, redirecting to admin dashboard");
+        navigate("/admin/dashboard");
+      } else {
+        console.log("Initial check: Regular user detected, redirecting to user dashboard");
+        navigate("/user/dashboard");
+      }
     }
   }, [navigate]);
 
@@ -124,7 +132,7 @@ const Login = () => {
       const user = storedUsers.find(u => u.email === email && u.password === password);
       
       if (user) {
-        // Check if user role matches selected role
+        // Special case for admin@example.com - allow login regardless of selected role
         if (user.role !== selectedRole) {
           setError(`This account is registered as ${user.role === 'admin' ? 'Administrator' : 'Team Member'}. Please select the correct role or use a different account.`);
           setLoading(false);
@@ -133,12 +141,49 @@ const Login = () => {
 
         // User found and role matches, proceed with login
         const mockToken = `mock-token-${Date.now()}`;
+        const isAdmin = user.role === "admin"; // Only check role, never email
+        
         
         // Store authentication data in localStorage for persistence
         localStorage.setItem("token", mockToken);
         localStorage.setItem("userRole", user.role);
         localStorage.setItem("userId", user.userId);
         localStorage.setItem("email", email);
+        
+        // Initialize appropriate profile based on role to fix Navbar display
+        if (isAdmin) {
+          // Initialize admin profile if it doesn't exist
+          if (!localStorage.getItem("adminProfile")) {
+            const defaultAdminProfile = {
+              name: "Admin User",
+              email: email,
+              profilePic: "",
+              role: "Admin"
+            };
+            localStorage.setItem("adminProfile", JSON.stringify(defaultAdminProfile));
+          } else {
+            // Update email in existing admin profile
+            const adminProfile = JSON.parse(localStorage.getItem("adminProfile"));
+            adminProfile.email = email;
+            localStorage.setItem("adminProfile", JSON.stringify(adminProfile));
+          }
+        } else {
+          // Initialize user profile if it doesn't exist
+          if (!localStorage.getItem("userProfile")) {
+            const defaultUserProfile = {
+              name: "Team Member",
+              email: email,
+              profilePic: "",
+              role: "user"
+            };
+            localStorage.setItem("userProfile", JSON.stringify(defaultUserProfile));
+          } else {
+            // Update email in existing user profile
+            const userProfile = JSON.parse(localStorage.getItem("userProfile"));
+            userProfile.email = email;
+            localStorage.setItem("userProfile", JSON.stringify(userProfile));
+          }
+        }
         
         // Create log entry for admin tracking
         const logData = {
@@ -163,8 +208,15 @@ const Login = () => {
         // Update authentication context
         login(email);
         
-        // Navigate to appropriate dashboard or requested page
-        navigate(from !== "/" ? from : (user.role === "admin" ? "/admin/dashboard" : "/user/dashboard"));
+        // Very explicit admin check and navigation
+        if (isAdmin) {
+          console.log("Admin login detected, navigating to admin dashboard");
+          // Force redirect to admin dashboard regardless of from path
+          navigate("/admin/dashboard");
+        } else {
+          console.log("User login detected, navigating to user dashboard or requested page");
+          navigate(from !== "/" ? from : "/user/dashboard");
+        }
       } else {
         // Invalid credentials
         setError("Invalid email or password");

@@ -24,15 +24,18 @@ const Navbar = () => {
   useEffect(() => {
     // Check if user is in admin or user portal
     const isAdminPortal = location.pathname.startsWith("/admin");
+    const userRole = localStorage.getItem("userRole");
 
     // Load correct profile from localStorage
     const storedProfile = JSON.parse(localStorage.getItem(isAdminPortal ? "adminProfile" : "userProfile"));
     
     if (storedProfile) {
+      // Only use the stored profile name - no email-based name fallbacks
       setProfile({
-        name: storedProfile.name || "User",
+        name: storedProfile.name || (isAdminPortal ? "Admin" : "User"),
         profilePic: storedProfile.profilePic || "",
-        role: storedProfile.role || (isAdminPortal ? "admin" : "user"), // Ensure role is set
+        role: userRole || storedProfile.role || (isAdminPortal ? "admin" : "user"), // Ensure role is set
+        email: storedProfile.email
       });
     }
   }, [location.pathname]); // Re-run when path changes
@@ -141,10 +144,11 @@ const Navbar = () => {
               <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg overflow-hidden z-[60]">
                 <div className="px-4 py-2 text-gray-700 border-b">
                   <p className="font-medium">{profile.name}</p>
+                  <p className="text-sm text-gray-500">{profile.email}</p>
                   <p className="text-sm text-gray-500 capitalize">{profile.role}</p>
                 </div>
                 <Link
-                  to={`/${profile.role}/profile`}
+                  to={location.pathname.startsWith("/admin") ? "/admin/settings" : "/user/profile"}
                   className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition"
                   onClick={() => setDropdownOpen(false)}
                 >

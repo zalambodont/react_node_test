@@ -52,10 +52,13 @@ const AuthRouter = () => {
   const userRole = localStorage.getItem("userRole");
   
   if (userRole === "admin") {
+    console.log("AuthRouter: Redirecting admin to admin dashboard");
     return <Navigate to="/admin/dashboard" replace />;
   } else if (userRole === "user") {
+    console.log("AuthRouter: Redirecting user to user dashboard");
     return <Navigate to="/user/dashboard" replace />;
   } else {
+    console.log("AuthRouter: No role set, redirecting to login");
     // If authenticated but no role set, redirect to login to set role
     return <Navigate to="/login" replace />;
   }
