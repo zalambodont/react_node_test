@@ -23,6 +23,7 @@ import Login from "./components/auth/Login";
 import Signup from "./components/auth/Signup";
 import ForgotPassword from "./components/auth/ForgotPassword";
 import ResetPassword from "./components/auth/ResetPassword";
+import AuthRouter from "./components/auth/AuthRouter";
 
 // Admin Pages
 import Dashboard from "./pages/AdminPages/Dashboard";
@@ -101,7 +102,8 @@ function App() {
             <main className="flex-grow">
               <Routes>
                 {/* Public Routes */}
-                <Route path="/" element={<Landing />} />
+                <Route path="/" element={<AuthRouter />} />
+                <Route path="/welcome" element={<Landing />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
