@@ -2,10 +2,11 @@
  * Login Component
  * 
  * A comprehensive authentication component that handles user login with proper
- * validation, error handling, and state management. Implements localStorage-based
- * authentication for persistent user sessions across browser refreshes.
+ * validation, error handling, and state management. Now includes role selection
+ * functionality for both login and signup options.
  * 
  * Features:
+ * - Role selection (Admin/User) directly on login page
  * - Supports both default and custom user accounts
  * - Persists authentication state across browser sessions
  * - Provides clear error feedback and loading states
@@ -13,13 +14,14 @@
  * - Logs authentication events for admin tracking
  * 
  * @author Senior Full-Stack Engineer
- * @version 2.0.0
+ * @version 3.0.0
  */
 
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { FaLock, FaEnvelope, FaExclamationCircle, FaSpinner } from "react-icons/fa";
+import { FaLock, FaEnvelope, FaExclamationCircle, FaSpinner, FaUserShield, FaUser } from "react-icons/fa";
+import { motion } from "framer-motion";
 
 const Login = () => {
   // State management with proper initialization
@@ -27,15 +29,27 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [selectedRole, setSelectedRole] = useState(null);
+  const [showLoginForm, setShowLoginForm] = useState(false);
   
   // Hooks initialization
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Extract role from location state or default to user
-  const role = location.state?.role || "user";
+  // Get role from location state if coming from direct navigation
+  const roleFromState = location.state?.role;
   const from = location.state?.from || "/";
+
+  /**
+   * Effect hook to handle role from navigation state
+   */
+  useEffect(() => {
+    if (roleFromState) {
+      setSelectedRole(roleFromState);
+      setShowLoginForm(true);
+    }
+  }, [roleFromState]);
 
   /**
    * Effect hook to check for existing authentication
@@ -48,6 +62,34 @@ const Login = () => {
       navigate(userRole === "admin" ? "/admin/dashboard" : "/user/dashboard");
     }
   }, [navigate]);
+
+  /**
+   * Handle role selection
+   * @param {string} role - Selected role (admin/user)
+   */
+  const handleRoleSelect = (role) => {
+    setSelectedRole(role);
+    setShowLoginForm(true);
+    setError(""); // Clear any previous errors
+  };
+
+  /**
+   * Handle back to role selection
+   */
+  const handleBackToRoleSelection = () => {
+    setShowLoginForm(false);
+    setSelectedRole(null);
+    setEmail("");
+    setPassword("");
+    setError("");
+  };
+
+  /**
+   * Handle signup navigation
+   */
+  const handleSignupNavigation = () => {
+    navigate("/signup", { state: { role: selectedRole } });
+  };
 
   /**
    * Handles form submission and authentication
@@ -82,7 +124,14 @@ const Login = () => {
       const user = storedUsers.find(u => u.email === email && u.password === password);
       
       if (user) {
-        // User found, proceed with login
+        // Check if user role matches selected role
+        if (user.role !== selectedRole) {
+          setError(`This account is registered as ${user.role === 'admin' ? 'Administrator' : 'Team Member'}. Please select the correct role or use a different account.`);
+          setLoading(false);
+          return;
+        }
+
+        // User found and role matches, proceed with login
         const mockToken = `mock-token-${Date.now()}`;
         
         // Store authentication data in localStorage for persistence
@@ -93,11 +142,13 @@ const Login = () => {
         
         // Create log entry for admin tracking
         const logData = {
+          id: `login-${Date.now()}`,
           userId: user.userId,
           username: email,
           role: user.role,
           action: "login",
           loginTime: new Date().toISOString(),
+          logoutTime: null,
           ipAddress: "127.0.0.1", // In production, this would be captured from the request
           tokenName: mockToken.substring(0, 10) + "..." // Truncated for security
         };
@@ -126,13 +177,100 @@ const Login = () => {
     }
   };
 
+  // If not showing login form, show role selection
+  if (!showLoginForm) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 p-6">
+        <div className="bg-white shadow-lg rounded-xl p-8 w-full max-w-4xl">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-gray-800 mb-4">Welcome to TaskFlow</h1>
+            <p className="text-lg text-gray-600">Choose your role to continue</p>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-2 max-w-3xl mx-auto">
+            {[
+              {
+                role: "user",
+                title: "Team Member",
+                description: "Create tasks, track progress, and collaborate with your team.",
+                icon: <FaUser className="text-4xl text-blue-500" />,
+                bgColor: "bg-blue-50",
+                borderColor: "border-blue-200",
+                buttonColor: "from-blue-500 to-blue-600"
+              },
+              {
+                role: "admin", 
+                title: "Administrator",
+                description: "Manage users, verify tasks, and oversee team operations.",
+                icon: <FaUserShield className="text-4xl text-purple-500" />,
+                bgColor: "bg-purple-50",
+                borderColor: "border-purple-200", 
+                buttonColor: "from-purple-500 to-purple-600"
+              }
+            ].map(({ role, title, description, icon, bgColor, borderColor, buttonColor }) => (
+              <motion.div
+                key={role}
+                className={`${bgColor} ${borderColor} border-2 p-6 rounded-xl hover:shadow-lg transition-all duration-300 cursor-pointer`}
+                whileHover={{ scale: 1.02 }}
+                onClick={() => handleRoleSelect(role)}
+              >
+                <div className="text-center mb-4">
+                  {icon}
+                </div>
+                <h3 className="text-2xl font-semibold text-gray-800 text-center mb-3">{title}</h3>
+                <p className="text-gray-600 text-center mb-6">{description}</p>
+                <button
+                  className={`w-full py-3 bg-gradient-to-r ${buttonColor} text-white font-semibold rounded-lg shadow-md hover:opacity-90 transition-opacity`}
+                >
+                  Continue as {title}
+                </button>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="text-center mt-8">
+            <p className="text-gray-600">
+              Want to access the full landing page?{" "}
+              <Link to="/welcome" className="text-blue-600 hover:underline">
+                Click here
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login form for selected role
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 p-6">
       <div className="bg-white shadow-lg rounded-xl p-8 w-full max-w-md transform transition duration-300 hover:scale-105">
+        {/* Back button */}
+        <button
+          onClick={handleBackToRoleSelection}
+          className="mb-4 text-blue-600 hover:text-blue-800 flex items-center text-sm"
+        >
+          ← Back to role selection
+        </button>
+
         {/* Header */}
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          {role === "admin" ? "Admin Login" : "User Login"}
-        </h2>
+        <div className="text-center mb-6">
+          <div className="mb-4">
+            {selectedRole === "admin" ? (
+              <FaUserShield className="text-5xl text-purple-500 mx-auto" />
+            ) : (
+              <FaUser className="text-5xl text-blue-500 mx-auto" />
+            )}
+          </div>
+          <h2 className="text-3xl font-bold text-gray-800">
+            {selectedRole === "admin" ? "Administrator Login" : "Team Member Login"}
+          </h2>
+          <p className="text-gray-600 mt-2">
+            {selectedRole === "admin" 
+              ? "Access admin dashboard and management tools" 
+              : "Access your tasks and collaboration tools"}
+          </p>
+        </div>
 
         {/* Error display with animation */}
         {error && (
@@ -191,53 +329,66 @@ const Login = () => {
           {/* Submit button with loading state */}
           <button
             type="submit"
-            className={`w-full py-2 rounded-md shadow-md transition duration-200 text-white ${
+            className={`w-full py-3 rounded-md shadow-md transition duration-200 text-white font-semibold ${
               loading
                 ? "bg-gray-400 cursor-not-allowed"
-                : "bg-gradient-to-r from-blue-500 to-purple-600 hover:opacity-90"
+                : selectedRole === "admin" 
+                  ? "bg-gradient-to-r from-purple-500 to-purple-600 hover:opacity-90"
+                  : "bg-gradient-to-r from-blue-500 to-blue-600 hover:opacity-90"
             }`}
             disabled={loading}
             aria-label="Login Button"
           >
             {loading ? (
-              <span className="flex items-center justify-center">
+              <div className="flex items-center justify-center">
                 <FaSpinner className="animate-spin mr-2" aria-hidden="true" />
-                Logging in...
-              </span>
+                Signing In...
+              </div>
             ) : (
-              "Login"
+              `Sign In as ${selectedRole === "admin" ? "Administrator" : "Team Member"}`
             )}
           </button>
         </form>
 
-        {/* Additional links */}
-        <div className="text-center mt-4 space-y-2">
-          <div>
-            <span
-              className="text-blue-600 text-sm hover:underline cursor-pointer"
-              onClick={() => navigate("/forgot-password", { state: { role } })}
+        {/* Signup link */}
+        <div className="mt-6 text-center">
+          <p className="text-gray-600 text-sm">
+            Don't have an account?{" "}
+            <button
+              onClick={handleSignupNavigation}
+              className="text-blue-600 hover:underline font-medium"
             >
-              Forgot Password?
-            </span>
+              Sign up as {selectedRole === "admin" ? "Administrator" : "Team Member"}
+            </button>
+          </p>
+        </div>
+
+        {/* Demo credentials */}
+        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          <p className="text-xs text-gray-600 mb-2 font-semibold">Demo Credentials:</p>
+          <div className="text-xs text-gray-600 space-y-1">
+            {selectedRole === "admin" ? (
+              <>
+                <p><strong>Admin:</strong> admin@example.com</p>
+                <p><strong>Password:</strong> password123</p>
+              </>
+            ) : (
+              <>
+                <p><strong>User:</strong> user@example.com</p>
+                <p><strong>Password:</strong> password123</p>
+              </>
+            )}
           </div>
-          <div>
-            <span className="text-gray-600 text-sm">Don't have an account? </span>
-            <Link
-              to="/signup"
-              state={{ role }}
-              className="text-blue-600 text-sm hover:underline"
-            >
-              Sign up
-            </Link>
-          </div>
-          <div>
-            <Link
-              to="/"
-              className="text-gray-500 text-sm hover:underline"
-            >
-              Back to Home
-            </Link>
-          </div>
+        </div>
+
+        {/* Forgot password link */}
+        <div className="mt-4 text-center">
+          <Link
+            to="/forgot-password"
+            className="text-sm text-blue-600 hover:underline"
+          >
+            Forgot your password?
+          </Link>
         </div>
       </div>
     </div>

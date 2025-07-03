@@ -404,14 +404,14 @@ const Signup = () => {
             state={{ role }}
             className="text-blue-600 text-sm hover:underline"
           >
-            Log in
+            Sign in as {role === "admin" ? "Administrator" : "Team Member"}
           </Link>
           <div className="mt-2">
             <Link
-              to="/"
+              to="/login"
               className="text-gray-500 text-sm hover:underline"
             >
-              Back to Home
+              ← Back to role selection
             </Link>
           </div>
         </div>

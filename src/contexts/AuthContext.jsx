@@ -112,6 +112,53 @@ const AuthProvider = ({ children }) => {
    * Clears authentication data and resets state
    */
   const handleLogout = () => {
+    // Get current user data before clearing for logout logging
+    const userId = localStorage.getItem("userId");
+    const email = localStorage.getItem("email");
+    const userRole = localStorage.getItem("userRole");
+    const token = localStorage.getItem("token");
+    
+    // Create logout log entry if user data exists
+    if (userId && email) {
+      const logData = {
+        id: `logout-${Date.now()}`,
+        userId: userId,
+        username: email,
+        role: userRole || "user",
+        action: "logout",
+        loginTime: null, // We don't have the original login time here
+        logoutTime: new Date().toISOString(),
+        ipAddress: "127.0.0.1", // In production, this would be captured from the request
+        tokenName: token ? token.substring(0, 10) + "..." : "unknown"
+      };
+      
+      // Update existing logs with logout information
+      const existingLogs = JSON.parse(localStorage.getItem('userLogs') || '[]');
+      
+      // Find the most recent login log for this user and update it with logout time
+      // Using reverse iteration for browser compatibility
+      let userLoginIndex = -1;
+      for (let i = existingLogs.length - 1; i >= 0; i--) {
+        if (existingLogs[i].userId === userId && 
+            existingLogs[i].action === 'login' && 
+            !existingLogs[i].logoutTime) {
+          userLoginIndex = i;
+          break;
+        }
+      }
+      
+      if (userLoginIndex !== -1) {
+        // Update existing login log with logout time
+        existingLogs[userLoginIndex].logoutTime = logData.logoutTime;
+      } else {
+        // Add new logout log if no matching login found
+        existingLogs.push(logData);
+      }
+      
+      localStorage.setItem('userLogs', JSON.stringify(existingLogs));
+      console.log("User logout logged:", logData);
+    }
+    
     // Clear all auth-related data from localStorage
     localStorage.removeItem("token");
     localStorage.removeItem("userRole");
@@ -121,7 +168,6 @@ const AuthProvider = ({ children }) => {
     // Reset user state
     setUser(null);
     
-    // In a real app, we might also invalidate the token on the server
     console.log("User logged out");
   };
 
